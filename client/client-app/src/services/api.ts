@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getToken } from "./authService";
+import type { User } from "../types/types";
 
 export const api = createApi({
   reducerPath: "api",
@@ -17,7 +18,7 @@ export const api = createApi({
     getItems: builder.query<{ id: number; name: string }[], void>({
       query: () => "items",
     }),
-    getUsers: builder.query<unknown[], void>({
+    getUsers: builder.query<User[], void>({
       query: () => "users",
     }),
     login: builder.mutation<
@@ -30,7 +31,30 @@ export const api = createApi({
         body: credentials,
       }),
     }),
+    createUser: builder.mutation<
+      void,
+      {
+        username: string;
+        password: string;
+        knownAs: string;
+        gender: string;
+        dateOfBirth: string;
+        city: string;
+        country: string;
+      }
+    >({
+      query: (newUser) => ({
+        url: "users",
+        method: "POST",
+        body: newUser,
+      }),
+    }),
   }),
 });
 
-export const { useGetItemsQuery, useLoginMutation } = api;
+export const {
+  useGetItemsQuery,
+  useLoginMutation,
+  useGetUsersQuery,
+  useCreateUserMutation,
+} = api;

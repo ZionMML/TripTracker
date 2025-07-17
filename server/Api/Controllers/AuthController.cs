@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using Api.DTOs;
 using Api.Models;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +42,7 @@ namespace Api.Controllers
             return Ok(new { token });
         }
 
-        private string GenerateJwtToken(ApplicationUser user)
+        private async Task<string> GenerateJwtToken(ApplicationUser user)
         {
             var jwtSettings = _config.GetSection("JwtSettings");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
@@ -54,13 +55,16 @@ namespace Api.Controllers
                 new(ClaimTypes.Name, user.UserName!),
             };
 
+            var roles = await _userManager.GetRolesAsync(user);
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.UtcNow.AddMinutes(
                 double.Parse(jwtSettings["ExpiresInMinutes"]!)
             );
 
             var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issure"],
+                issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
                 expires: expires,

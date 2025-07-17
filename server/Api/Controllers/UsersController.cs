@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Api.Controllers
 {
@@ -16,11 +17,18 @@ namespace Api.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
 
+        //[Authorize(Roles = "Admin")]
         [HttpGet] // GET: api/users
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetUsers()
         {
             var users = await _userManager.Users.ToListAsync();
-            var userDtos = _mapper.Map<IEnumerable<UserDto>>(users);
+            var userDtos = new List<UserDto>();
+
+            foreach (var user in users)
+            {
+                userDtos.Add(await MapUserWithRoles(user));
+            }
+
             return Ok(userDtos);
         }
 
@@ -34,7 +42,17 @@ namespace Api.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(_mapper.Map<UserDto>(user));
+            var userDto = await MapUserWithRoles(user);
+
+            return Ok(userDto);
+        }
+
+        private async Task<UserDto> MapUserWithRoles(ApplicationUser user)
+        {
+            var userDto = _mapper.Map<UserDto>(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            userDto.Role = roles.FirstOrDefault() ?? "User";
+            return userDto;
         }
 
         [HttpPut] //PUT: api/users/{username}
@@ -55,6 +73,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("{usernmae}")] //DELETE: api/users/{username}
         public async Task<IActionResult> DeleteUser(string username)
         {
@@ -73,8 +92,9 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<UserDto>> CreateUser(CreateUserDto createUserDto)
+        public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
         {
             if (await _userManager.FindByNameAsync(createUserDto.Username) is not null)
                 return BadRequest("Username is already taken.");
@@ -86,6 +106,8 @@ namespace Api.Controllers
 
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
+
+            await _userManager.AddToRoleAsync(user, "User");
 
             var userDto = _mapper.Map<UserDto>(user);
 
