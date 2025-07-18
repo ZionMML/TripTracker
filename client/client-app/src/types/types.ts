@@ -6,6 +6,11 @@ export interface User {
   city: string;
   country: string;
   role: string;
+  firstContactName: string;
+  firstContactPhNo: string;
+  secondContactName: string;
+  secondContactPhNo: string;
+  about: string;
   key: React.Key;
 }
 
@@ -17,4 +22,9 @@ export interface CreateUserDto {
   dateOfBirth: string; // should be formatted as "YYYY-MM-DD"
   city: string;
   country: string;
+  firstContactName: string;
+  firstContactPhNo: string;
+  secondContactName: string;
+  secondContactPhNo: string;
+  about: string;
 }

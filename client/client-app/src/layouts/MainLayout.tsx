@@ -28,15 +28,27 @@ const MainLayout: React.FC = () => {
 
   const location = useLocation();
 
+  const normalizePath = (() => {
+    console.log(location.pathname);
+    if (location.pathname.startsWith("/user/userdetail"))
+      return "/user/userdetail";
+    if (location.pathname.startsWith("/user/userslist"))
+      return "/user/userslist";
+    if (location.pathname.startsWith("/users/edit")) return "/user/userdetail";
+    return location.pathname;
+  })();
+
   const pathToKey: Record<string, string> = {
     "/home": "1",
     "/user/userdetail": "2",
     "/user/userslist": "3",
     "/trip": "4",
     "/triphistory": "5",
+    "/users/edit": "6",
   };
 
-  const selectedKey = pathToKey[location.pathname] || "";
+  const selectedKey = pathToKey[normalizePath] || "";
+  console.log("selectedKey:", selectedKey);
 
   const handleLogout = () => {
     clearToken();
@@ -64,7 +76,7 @@ const MainLayout: React.FC = () => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={[selectedKey]}
+          selectedKeys={[selectedKey]}
           onClick={({ key }) => {
             if (key === "1") navigate("/home");
             if (key === "2") navigate("/user/userdetail");

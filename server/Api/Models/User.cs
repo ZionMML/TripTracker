@@ -12,4 +12,9 @@ public class ApplicationUser : IdentityUser
     public required string Gender { get; set; }
     public required string City { get; set; }
     public required string Country { get; set; }
+    public string? FirstContactName { get; set; }
+    public string? FirstContactPhNo { get; set; }
+    public string? SecondContactName { get; set; }
+    public string? SecondContactPhNo { get; set; }
+    public string? About { get; set; }
 }
