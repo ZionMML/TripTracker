@@ -70,7 +70,7 @@ const DynamicTable = <T extends { key: React.Key }>({
       className={styles.customTable}
       columns={finalColumns}
       dataSource={data}
-      scroll={{ x: "max-content", y: 55 * 12 }}
+      scroll={{ x: "max-content", y: 54 * 10 }}
       pagination={{ pageSize: 10 }}
     />
   );

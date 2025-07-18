@@ -1,4 +1,5 @@
 import "antd/dist/reset.css"; // Ant Design reset styles (v5+)
+import "@ant-design/v5-patch-for-react-19";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";

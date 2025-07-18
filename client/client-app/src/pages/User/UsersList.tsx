@@ -1,16 +1,19 @@
 import React, { useRef } from "react";
-import { Button, Space, Input, Tag } from "antd";
+import { Button, Space, Input, Tag, message } from "antd";
 import type { InputRef, TableColumnsType } from "antd";
-import { useGetUsersQuery } from "../../services/api";
+import { useDeleteUserMutation, useGetUsersQuery } from "../../services/api";
 import DynamicTable from "../../components/DynamicTable";
 import type { User } from "../../types/types";
 import type { ColumnType } from "antd/es/table";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import { SearchOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 const UsersList: React.FC = () => {
   const { data: users = [], isLoading } = useGetUsersQuery();
+  const [deleteUser] = useDeleteUserMutation();
   const inputRef = useRef<InputRef>(null);
+  const navigate = useNavigate();
 
   console.log("users:", JSON.stringify(users, null, 2));
 
@@ -23,11 +26,19 @@ const UsersList: React.FC = () => {
 
   const handleEdit = (record: User) => {
     console.log("Edit:", record);
+    navigate(`/users/edit/${record.username}`);
   };
 
-  const handleDelete = (record: User) => {
+  const handleDelete = async (record: User) => {
     console.log("Delete:", record);
+    try {
+      await deleteUser(record.username).unwrap();
+      message.success(`Deleted user ${record.username}`);
+    } catch {
+      message.error("Failed to delete user");
+    }
   };
+
   const getColumnSearchProps = (dataIndex: keyof User): ColumnType<User> => {
     return {
       filterDropdown: ({

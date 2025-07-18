@@ -26,6 +26,7 @@ namespace Api.Helpers
                 .ConvertUsing(d =>
                     d.HasValue ? DateTime.SpecifyKind(d.Value, DateTimeKind.Utc) : null
                 );
+            CreateMap<DateTime, DateOnly>().ConvertUsing(dt => DateOnly.FromDateTime(dt));
         }
     }
 }

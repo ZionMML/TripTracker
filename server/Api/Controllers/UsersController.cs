@@ -55,7 +55,7 @@ namespace Api.Controllers
             return userDto;
         }
 
-        [HttpPut] //PUT: api/users/{username}
+        [HttpPut("{username}")] //PUT: api/users/{username}
         public async Task<ActionResult> UpdateUser(string username, UpdateUserDto updateUserDto)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(u =>
@@ -74,7 +74,7 @@ namespace Api.Controllers
         }
 
         //[Authorize(Roles = "Admin")]
-        [HttpDelete("{usernmae}")] //DELETE: api/users/{username}
+        [HttpDelete("{username}")] //DELETE: api/users/{username}
         public async Task<IActionResult> DeleteUser(string username)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(u =>

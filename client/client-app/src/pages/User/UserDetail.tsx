@@ -1,15 +1,40 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, DatePicker, Form, Input, Select, message } from "antd";
-import { useNavigate } from "react-router-dom";
-import { useCreateUserMutation } from "../../services/api";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  useCreateUserMutation,
+  useGetUserQuery,
+  useUpdateUserMutation,
+} from "../../services/api";
 import dayjs from "dayjs";
 import type { CreateUserDto } from "../../types/types";
 
-const UserDetail: React.FC = () => {
+type UserDetailProps = {
+  isEditMode?: boolean;
+};
+
+const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
   //const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
   const [form] = Form.useForm<CreateUserDto>();
   const navigate = useNavigate();
   const [createUser, { isLoading }] = useCreateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
+  const { username } = useParams();
+  const { data: user } = useGetUserQuery(username!, {
+    skip: !isEditMode || !username,
+  });
+
+  useEffect(() => {
+    if (isEditMode && user) {
+      console.log("User Detail - User", JSON.stringify(user));
+      form.setFieldsValue({
+        ...user,
+        dateOfBirth: user.dateOfBirth
+          ? (dayjs(user.dateOfBirth) as unknown as string)
+          : undefined,
+      });
+    }
+  }, [isEditMode, user, form]);
 
   const handleSubmit = async (values: CreateUserDto) => {
     try {
@@ -18,10 +43,23 @@ const UserDetail: React.FC = () => {
         dateOfBirth: dayjs(values.dateOfBirth).format("YYYY-MM-DD"),
       };
 
-      await createUser(formattedValues).unwrap();
-      message.success("User created successfully!");
-      form.resetFields();
-      navigate("/userlist");
+      if (isEditMode) {
+        await updateUser({
+          username: username!,
+          body: formattedValues,
+        }).unwrap();
+        message.success("User updated successfully!");
+        setTimeout(() => {
+          form.resetFields();
+          navigate("/user/userslist");
+        }, 500);
+      } else {
+        await createUser(formattedValues).unwrap();
+        message.success("User created successfully!");
+        setTimeout(() => {
+          form.resetFields();
+        }, 500);
+      }
     } catch (error: unknown) {
       message.error("Failed to create user");
       console.log(error);
@@ -31,6 +69,7 @@ const UserDetail: React.FC = () => {
   return (
     <>
       <Form
+        form={form}
         labelCol={{ span: 4 }}
         wrapperCol={{ span: 14 }}
         layout="horizontal"
@@ -46,13 +85,15 @@ const UserDetail: React.FC = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: "Password is required" }]}
-        >
-          <Input.Password />
-        </Form.Item>
+        {!isEditMode && (
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Password is required" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+        )}
 
         <Form.Item
           label="Known As"
