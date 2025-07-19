@@ -18,6 +18,8 @@ import {
 } from "../../services/api";
 import dayjs from "dayjs";
 import type { CreateUserDto } from "../../types/types";
+import type { RootState } from "../../store";
+import { useSelector } from "react-redux";
 
 type UserDetailProps = {
   isEditMode?: boolean;
@@ -29,15 +31,21 @@ const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
   const navigate = useNavigate();
   const [createUser, { isLoading }] = useCreateUserMutation();
   const [updateUser] = useUpdateUserMutation();
-  const { username } = useParams();
-  const { data: user, refetch } = useGetUserQuery(username!, {
-    skip: !isEditMode || !username,
+
+  const userInfo = useSelector((state: RootState) => state.auth);
+  // console.log("Logged in as:", userInfo.user?.username);
+  // console.log("Known as:", userInfo.user?.knownAs);
+  // console.log("Role:", userInfo.user?.role);
+  // console.log("Token expiry:", userInfo.user?.exp);
+
+  const params = useParams();
+  const username = isEditMode ? params.username : userInfo.user?.username;
+  const { data: user } = useGetUserQuery(username!, {
+    skip: !username,
   });
 
   useEffect(() => {
-    if (isEditMode && user) {
-      refetch();
-      console.log("User Detail - User", JSON.stringify(user));
+    if (username && user) {
       form.setFieldsValue({
         ...user,
         dateOfBirth: user.dateOfBirth
@@ -45,7 +53,7 @@ const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
           : undefined,
       });
     }
-  }, [isEditMode, user, form, refetch]);
+  }, [user, form, username]);
 
   const handleSubmit = async (values: CreateUserDto) => {
     try {
@@ -73,7 +81,7 @@ const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
       }
     } catch (error: unknown) {
       message.error("Failed to create user");
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -156,15 +164,16 @@ const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
             >
               <Input />
             </Form.Item>
-            {!isEditMode && (
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[{ required: true, message: "Password is required" }]}
-              >
-                <Input.Password />
-              </Form.Item>
-            )}
+            {!isEditMode ||
+              (user && (
+                <Form.Item
+                  label="Password"
+                  name="password"
+                  rules={[{ required: true, message: "Password is required" }]}
+                >
+                  <Input.Password />
+                </Form.Item>
+              ))}
             <Form.Item
               label="Gender"
               name="gender"

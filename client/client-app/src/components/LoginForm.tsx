@@ -1,10 +1,10 @@
 import React from "react";
 import { Button, Form, Input, message, Typography } from "antd";
 import { useLoginMutation } from "../services/api";
-import { setToken } from "../services/authService";
 import { useDispatch } from "react-redux";
 import { setUser } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
+import { getUserInfoFromToken } from "../utils/auth";
 
 const { Title, Text } = Typography;
 
@@ -22,15 +22,22 @@ const LoginForm: React.FC = () => {
   const onFinish = async (values: LoginFormFields) => {
     try {
       const result = await login(values).unwrap();
-      setToken(result.token);
 
-      dispatch(
-        setUser({
-          username: values.username,
-          knownAs: values.username,
-          token: result.token,
-        })
-      );
+      //console.log("Login result:", result); // Should log an object with a string token
+      //console.log("Type of result.token:", typeof result.token); // Should be "string"
+      const tokenInfo = getUserInfoFromToken(result.token);
+
+      if (tokenInfo) {
+        dispatch(
+          setUser({
+            username: values.username,
+            knownAs: "",
+            role: tokenInfo.role,
+            exp: tokenInfo.exp,
+            token: result.token,
+          })
+        );
+      }
 
       navigate("/home");
     } catch {

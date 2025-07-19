@@ -23,7 +23,7 @@ namespace Api.Controllers
         private readonly IConfiguration _config = config;
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(LoginDto loginDto)
+        public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.FindByNameAsync(loginDto.Username);
             if (user == null)
@@ -38,8 +38,8 @@ namespace Api.Controllers
             if (!result.Succeeded)
                 return Unauthorized("Invalid password");
 
-            var token = GenerateJwtToken(user);
-            return Ok(new { token });
+            var token = await GenerateJwtToken(user);
+            return Ok(new AuthResponseDto { Token = token });
         }
 
         private async Task<string> GenerateJwtToken(ApplicationUser user)
@@ -52,11 +52,11 @@ namespace Api.Controllers
                 new(JwtRegisteredClaimNames.Sub, user.UserName!),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new(ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Name, user.UserName!),
+                new("username", user.UserName!),
             };
 
             var roles = await _userManager.GetRolesAsync(user);
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+            claims.AddRange(roles.Select(role => new Claim("role", role)));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.UtcNow.AddMinutes(

@@ -25,12 +25,10 @@ const UsersList: React.FC = () => {
     }));
 
   const handleEdit = (record: User) => {
-    console.log("Edit:", record);
     navigate(`/users/edit/${record.username}`);
   };
 
   const handleDelete = async (record: User) => {
-    console.log("Delete:", record);
     try {
       await deleteUser(record.username).unwrap();
       message.success(`Deleted user ${record.username}`);

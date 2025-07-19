@@ -29,7 +29,7 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
 
   const normalizePath = (() => {
-    console.log(location.pathname);
+    //console.log(location.pathname);
     if (location.pathname.startsWith("/user/userdetail"))
       return "/user/userdetail";
     if (location.pathname.startsWith("/user/userslist"))
@@ -48,7 +48,7 @@ const MainLayout: React.FC = () => {
   };
 
   const selectedKey = pathToKey[normalizePath] || "";
-  console.log("selectedKey:", selectedKey);
+  //console.log("selectedKey:", selectedKey);
 
   const handleLogout = () => {
     clearToken();
