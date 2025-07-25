@@ -9,7 +9,7 @@ using Microsoft.VisualBasic;
 
 namespace Api.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController(UserManager<ApplicationUser> userManager, IMapper _mapper)
@@ -17,7 +17,7 @@ namespace Api.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet] // GET: api/users
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetUsers()
         {
@@ -32,6 +32,7 @@ namespace Api.Controllers
             return Ok(userDtos);
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{username}")] // GET: api/users/{username}
         public async Task<ActionResult<ApplicationUser>> GetUser(string username)
         {
@@ -55,6 +56,7 @@ namespace Api.Controllers
             return userDto;
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpPut("{username}")] //PUT: api/users/{username}
         public async Task<ActionResult> UpdateUser(string username, UpdateUserDto updateUserDto)
         {
@@ -73,7 +75,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{username}")] //DELETE: api/users/{username}
         public async Task<IActionResult> DeleteUser(string username)
         {
@@ -92,7 +94,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
         {

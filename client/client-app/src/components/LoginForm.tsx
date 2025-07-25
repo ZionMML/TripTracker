@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { getUserInfoFromToken } from "../utils/auth";
+import { setToken } from "../services/authService";
 
 const { Title, Text } = Typography;
 
@@ -35,11 +36,12 @@ const LoginForm: React.FC = () => {
             role: tokenInfo.role,
             exp: tokenInfo.exp,
             token: result.token,
+            refreshToken: result.refreshToken,
           })
         );
+        navigate("/home");
       }
-
-      navigate("/home");
+      setToken(result.token, result.refreshToken);
     } catch {
       message.error("Invalid username or password", 3);
     }
@@ -77,7 +79,7 @@ const LoginForm: React.FC = () => {
           <Text type="secondary">Login to your account</Text>
         </div>
         <Form.Item
-          label="Usernmae"
+          label="Username"
           name="username"
           rules={[{ required: true, message: "Please enter your username" }]}
         >

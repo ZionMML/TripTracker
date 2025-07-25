@@ -7,6 +7,7 @@ interface User {
   role: string;
   exp: number;
   token: string;
+  refreshToken: string;
 }
 
 interface AuthState {

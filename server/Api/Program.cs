@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -15,7 +16,47 @@ var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+    // 🔐 Add JWT bearer token support
+    c.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Description =
+                @"JWT Authorization header using the Bearer scheme.  
+                        Enter 'Bearer' [space] and then your token.  
+                        Example: 'Bearer abcdef12345'",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer",
+        }
+    );
+
+    c.AddSecurityRequirement(
+        new OpenApiSecurityRequirement()
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer",
+                    },
+                    Scheme = "Bearer",
+                    Name = "Bearer",
+                    In = ParameterLocation.Header,
+                },
+                new List<string>()
+            },
+        }
+    );
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -36,15 +77,20 @@ builder
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 builder
-    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidateLifetime = true,
+            ValidateLifetime = true, // to validate the expired token
             ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.FromMinutes(5),
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
@@ -52,6 +98,8 @@ builder
             ),
         };
     });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -75,14 +123,28 @@ app.UseCors(MyAllowSpecificOrigins);
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Trip Tracker API V1"));
 }
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseHttpsRedirection(); //Redirect HTTP to HTTPS early
+app.UseRouting(); //Setup route matching
 
-app.MapControllers();
+// app.Use(
+//     async (context, next) =>
+//     {
+//         Console.WriteLine("[AUTH DEBUG] Request Headers:");
+//         foreach (var h in context.Request.Headers)
+//         {
+//             Console.WriteLine($"{h.Key}: {h.Value}");
+//         }
+
+//         await next();
+//     }
+// );
+app.UseAuthentication(); //Validate token and identity
+app.UseAuthorization(); //Check if user has acess
+
+app.MapControllers(); //Execute the matching endpoint
 
 var summaries = new[]
 {
