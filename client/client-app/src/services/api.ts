@@ -13,7 +13,7 @@ type RefreshResposne = {
 };
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5253/api",
+  baseUrl: "https://localhost:7191/api",
   prepareHeaders: (headers) => {
     const token = getToken();
     if (token) {

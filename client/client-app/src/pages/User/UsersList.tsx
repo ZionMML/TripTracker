@@ -15,7 +15,7 @@ const UsersList: React.FC = () => {
   const inputRef = useRef<InputRef>(null);
   const navigate = useNavigate();
 
-  console.log("users:", JSON.stringify(users, null, 2));
+  //console.log("users:", JSON.stringify(users, null, 2));
 
   const usersWithKeys: User[] = users
     .filter((user): user is User => !!user)
