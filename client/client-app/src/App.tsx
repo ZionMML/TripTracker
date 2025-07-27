@@ -30,6 +30,14 @@ const App = () => {
           }
         />
         <Route
+          path="/user/create"
+          element={
+            <PrivateRoute>
+              <UserDetail isNewMode={true} />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/users/edit/:username"
           element={
             <PrivateRoute>

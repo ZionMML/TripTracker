@@ -7,11 +7,6 @@ namespace Api.Data;
 
 public class UserRepository(ApplicationDbContext _context) : IUserRepository
 {
-    public void Delete(ApplicationUser user)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
     {
         return await _context.Users.Include(u => u.ProfilePhoto).ToListAsync();
@@ -30,6 +25,11 @@ public class UserRepository(ApplicationDbContext _context) : IUserRepository
     }
 
     public void Update(ApplicationUser user)
+    {
+        _context.Entry(user).State = EntityState.Modified;
+    }
+
+    public void Delete(ApplicationUser user)
     {
         _context.Users.Remove(user);
     }

@@ -483,3 +483,5 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 server/Api/appsettings.json
+client/client-app/cert/cert.pem
+client/client-app/cert/key.pem

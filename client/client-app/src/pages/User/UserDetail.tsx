@@ -22,10 +22,14 @@ import type { RootState } from "../../store";
 import { useSelector } from "react-redux";
 
 type UserDetailProps = {
+  isNewMode?: boolean;
   isEditMode?: boolean;
 };
 
-const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
+const UserDetail: React.FC<UserDetailProps> = ({
+  isNewMode = false,
+  isEditMode = false,
+}) => {
   //const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
   const [form] = Form.useForm<CreateUserDto>();
   const navigate = useNavigate();
@@ -33,16 +37,23 @@ const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
   const [updateUser] = useUpdateUserMutation();
 
   const userInfo = useSelector((state: RootState) => state.auth);
-  // console.log("Logged in as:", userInfo.user?.username);
-  // console.log("Known as:", userInfo.user?.knownAs);
-  // console.log("Role:", userInfo.user?.role);
-  // console.log("Token expiry:", userInfo.user?.exp);
+  //console.log("Logged in as:", userInfo.user?.username);
+  //console.log("Known as:", userInfo.user?.knownAs);
+  //console.log("Role:", userInfo.user?.role);
+  //console.log("Token expiry:", userInfo.user?.exp);
 
   const params = useParams();
-  const username = isEditMode ? params.username : userInfo.user?.username;
+  const username = isNewMode
+    ? null
+    : isEditMode
+    ? params.username
+    : userInfo.user?.username;
   const { data: user } = useGetUserQuery(username!, {
     skip: !username,
   });
+
+  //console.log("isEditMode:", isEditMode);
+  //console.log("user", user);
 
   useEffect(() => {
     if (username && user) {
@@ -62,15 +73,17 @@ const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
         dateOfBirth: dayjs(values.dateOfBirth).format("YYYY-MM-DD"),
       };
 
-      if (isEditMode) {
+      if (!isNewMode) {
         await updateUser({
           username: username!,
           body: formattedValues,
         }).unwrap();
         message.success("User updated successfully!");
         setTimeout(() => {
-          form.resetFields();
-          navigate("/user/userslist");
+          if (isEditMode) {
+            form.resetFields();
+            navigate("/user/userslist");
+          }
         }, 500);
       } else {
         await createUser(formattedValues).unwrap();
@@ -164,16 +177,15 @@ const UserDetail: React.FC<UserDetailProps> = ({ isEditMode = false }) => {
             >
               <Input />
             </Form.Item>
-            {!isEditMode ||
-              (user && (
-                <Form.Item
-                  label="Password"
-                  name="password"
-                  rules={[{ required: true, message: "Password is required" }]}
-                >
-                  <Input.Password />
-                </Form.Item>
-              ))}
+            {isNewMode && (
+              <Form.Item
+                label="Password"
+                name="password"
+                rules={[{ required: true, message: "Password is required" }]}
+              >
+                <Input.Password />
+              </Form.Item>
+            )}
             <Form.Item
               label="Gender"
               name="gender"

@@ -123,6 +123,9 @@ export const api = createApi({
     }),
     getUser: builder.query<User, string>({
       query: (username) => `users/${username}`,
+      providesTags: (_result, _error, username) => [
+        { type: "Users", id: username },
+      ],
     }),
     login: builder.mutation<
       { token: string; refreshToken: string },
@@ -162,7 +165,12 @@ export const api = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Users"],
+      invalidatesTags: (_result, _error, { username }) => [
+        {
+          type: "Users",
+          id: username,
+        },
+      ],
     }),
     deleteUser: builder.mutation<void, string>({
       query: (username) => ({
