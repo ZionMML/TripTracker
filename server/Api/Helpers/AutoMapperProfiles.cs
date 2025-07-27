@@ -27,6 +27,12 @@ namespace Api.Helpers
                     d.HasValue ? DateTime.SpecifyKind(d.Value, DateTimeKind.Utc) : null
                 );
             CreateMap<DateTime, DateOnly>().ConvertUsing(dt => DateOnly.FromDateTime(dt));
+            CreateMap<ApplicationUser, UserDto>()
+                .ForMember(
+                    dest => dest.ProfilePhotoUrl,
+                    opt =>
+                        opt.MapFrom(src => src.ProfilePhoto != null ? src.ProfilePhoto.Url : null)
+                );
         }
     }
 }

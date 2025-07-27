@@ -1,4 +1,5 @@
 using Api.DTOs;
+using Api.Interfaces;
 using Api.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -12,16 +13,20 @@ namespace Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController(UserManager<ApplicationUser> userManager, IMapper _mapper)
-        : ControllerBase
+    public class UsersController(
+        IUserRepository userRepository,
+        UserManager<ApplicationUser> userManager,
+        IMapper _mapper
+    ) : ControllerBase
     {
+        private readonly IUserRepository _userRepository = userRepository;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
 
         [Authorize(Roles = "Admin")]
         [HttpGet] // GET: api/users
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetUsers()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userRepository.GetAllUsersAsync();
             var userDtos = new List<UserDto>();
 
             foreach (var user in users)
@@ -36,9 +41,7 @@ namespace Api.Controllers
         [HttpGet("{username}")] // GET: api/users/{username}
         public async Task<ActionResult<ApplicationUser>> GetUser(string username)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u =>
-                u.NormalizedUserName == username.ToUpper()
-            );
+            var user = await _userRepository.GetUserByUsernameAsync(username);
 
             if (user == null)
                 return NotFound();
@@ -60,17 +63,16 @@ namespace Api.Controllers
         [HttpPut("{username}")] //PUT: api/users/{username}
         public async Task<ActionResult> UpdateUser(string username, UpdateUserDto updateUserDto)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u =>
-                u.NormalizedUserName == username.ToUpper()
-            );
+            var user = await _userRepository.GetUserByUsernameAsync(username);
 
             if (user == null)
                 return NotFound();
 
             _mapper.Map(updateUserDto, user);
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
+            _userRepository.Update(user);
+
+            if (!await _userRepository.SaveAllAsync())
+                return BadRequest("Failed to update user");
 
             return NoContent();
         }
@@ -79,17 +81,15 @@ namespace Api.Controllers
         [HttpDelete("{username}")] //DELETE: api/users/{username}
         public async Task<IActionResult> DeleteUser(string username)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(u =>
-                u.NormalizedUserName == username.ToUpper()
-            );
+            var user = await _userRepository.GetUserByUsernameAsync(username);
 
             if (user == null)
                 return NotFound();
 
-            var result = await _userManager.DeleteAsync(user);
+            _userRepository.Delete(user);
 
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
+            if (!await _userRepository.SaveAllAsync())
+                return BadRequest("Failed to delete user");
 
             return NoContent();
         }

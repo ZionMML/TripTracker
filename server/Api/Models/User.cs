@@ -19,4 +19,6 @@ public class ApplicationUser : IdentityUser
     public string? About { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime RefreshTokenExpiryTime { get; set; }
+
+    public ProfilePhoto? ProfilePhoto { get; set; } = null;
 }
