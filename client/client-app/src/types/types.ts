@@ -12,6 +12,13 @@ export interface User {
   secondContactPhNo: string;
   about: string;
   key: React.Key;
+  profilePhotoUrl?: string;
+  profilePhotoId?: number;
+}
+
+export interface ProfilePhoto {
+  id: number;
+  url: string;
 }
 
 export interface CreateUserDto {

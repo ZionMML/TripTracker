@@ -1,4 +1,5 @@
 using Api.DTOs;
+using API.DTOs;
 using Api.Models;
 using AutoMapper;
 
@@ -27,6 +28,20 @@ namespace Api.Helpers
                     d.HasValue ? DateTime.SpecifyKind(d.Value, DateTimeKind.Utc) : null
                 );
             CreateMap<DateTime, DateOnly>().ConvertUsing(dt => DateOnly.FromDateTime(dt));
+            CreateMap<ApplicationUser, UserDto>()
+                .ForMember(
+                    dest => dest.ProfilePhotoUrl,
+                    opt =>
+                        opt.MapFrom(src => src.ProfilePhoto != null ? src.ProfilePhoto.Url : null)
+                )
+                .ForMember(
+                    dest => dest.ProfilePhotoId,
+                    opt =>
+                        opt.MapFrom(src =>
+                            src.ProfilePhoto != null ? src.ProfilePhoto.Id : (int?)null
+                        )
+                );
+            CreateMap<ProfilePhoto, PhotoDto>();
         }
     }
 }

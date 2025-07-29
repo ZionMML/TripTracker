@@ -13,8 +13,9 @@ import {
 import { Button, Layout, Menu, theme } from "antd";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { clearToken } from "../services/authService";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../features/auth/authSlice";
+import { type RootState } from "../store";
 
 const { Header, Sider, Content } = Layout;
 
@@ -26,6 +27,9 @@ const MainLayout: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const userRole = useSelector((state: RootState) => state.auth.user?.role);
+  //console.log("User Role:", userRole);
+
   const location = useLocation();
 
   const normalizePath = (() => {
@@ -35,6 +39,7 @@ const MainLayout: React.FC = () => {
     if (location.pathname.startsWith("/user/userslist"))
       return "/user/userslist";
     if (location.pathname.startsWith("/users/edit")) return "/user/userdetail";
+    if (location.pathname.startsWith("/user/create")) return "/user/userdetail";
     return location.pathname;
   })();
 
@@ -45,6 +50,7 @@ const MainLayout: React.FC = () => {
     "/trip": "4",
     "/triphistory": "5",
     "/users/edit": "6",
+    "/user/create": "7",
   };
 
   const selectedKey = pathToKey[normalizePath] || "";
@@ -96,11 +102,15 @@ const MainLayout: React.FC = () => {
               icon: <UserOutlined />,
               label: "Profile",
             },
-            {
-              key: "3",
-              icon: <UsergroupAddOutlined />,
-              label: "Profiles List",
-            },
+            ...(userRole?.trim().toLowerCase() === "admin"
+              ? [
+                  {
+                    key: "3",
+                    icon: <UsergroupAddOutlined />,
+                    label: "Profiles List",
+                  },
+                ]
+              : []),
             {
               key: "4",
               icon: <StockOutlined />,
@@ -120,13 +130,31 @@ const MainLayout: React.FC = () => {
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }}>
+        <Header
+          style={{
+            padding: 0,
+            background: colorBgContainer,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{ fontSize: "16px", width: 64, height: 64 }}
           />
+
+          {location.pathname === "/user/userslist" && (
+            <Button
+              type="primary"
+              onClick={() => navigate("/user/create")}
+              style={{ marginRight: 16 }}
+            >
+              Create New User
+            </Button>
+          )}
         </Header>
         <Content
           style={{

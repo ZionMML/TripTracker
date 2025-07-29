@@ -14,4 +14,7 @@ public class UserDto
     public string? SecondContactName { get; set; }
     public string? SecondContactPhNo { get; set; }
     public string? About { get; set; }
+
+    public string? ProfilePhotoUrl { get; set; }
+    public int? ProfilePhotoId { get; set; }
 }
