@@ -16,4 +16,5 @@ public class UserDto
     public string? About { get; set; }
 
     public string? ProfilePhotoUrl { get; set; }
+    public int? ProfilePhotoId { get; set; }
 }

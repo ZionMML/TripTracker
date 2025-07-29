@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearToken, getRefreshToken, getToken, setToken } from "./authService";
-import type { CreateUserDto, User } from "../types/types";
+import type { CreateUserDto, ProfilePhoto, User } from "../types/types";
 import type {
   BaseQueryFn,
   FetchArgs,
@@ -179,6 +179,31 @@ export const api = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    addPhoto: builder.mutation<
+      ProfilePhoto,
+      { username: string; file: File; isProfilePhoto: boolean }
+    >({
+      query: ({ username, file, isProfilePhoto }) => {
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("file", file);
+        formData.append("isProfilePhoto", String(isProfilePhoto));
+
+        return {
+          url: "users/add-photo",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["Users"],
+    }),
+    deletePhoto: builder.mutation<void, { photoId: number; username: string }>({
+      query: ({ photoId, username }) => ({
+        url: `users/delete-photo?photoId=${photoId}&username=${username}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
@@ -190,4 +215,6 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useAddPhotoMutation,
+  useDeletePhotoMutation,
 } = api;

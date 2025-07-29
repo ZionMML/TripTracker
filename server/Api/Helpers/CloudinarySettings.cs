@@ -1,6 +1,6 @@
 namespace API.Helpers;
 
-public class CloudnarySettings
+public class CloudinarySettings
 {
     public required string CloudName { get; set; }
     public required string ApiKey { get; set; }

@@ -28,7 +28,7 @@ const MainLayout: React.FC = () => {
   } = theme.useToken();
 
   const userRole = useSelector((state: RootState) => state.auth.user?.role);
-  console.log("User Role:", userRole);
+  //console.log("User Role:", userRole);
 
   const location = useLocation();
 

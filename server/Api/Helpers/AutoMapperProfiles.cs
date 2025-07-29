@@ -1,4 +1,5 @@
 using Api.DTOs;
+using API.DTOs;
 using Api.Models;
 using AutoMapper;
 
@@ -32,7 +33,15 @@ namespace Api.Helpers
                     dest => dest.ProfilePhotoUrl,
                     opt =>
                         opt.MapFrom(src => src.ProfilePhoto != null ? src.ProfilePhoto.Url : null)
+                )
+                .ForMember(
+                    dest => dest.ProfilePhotoId,
+                    opt =>
+                        opt.MapFrom(src =>
+                            src.ProfilePhoto != null ? src.ProfilePhoto.Id : (int?)null
+                        )
                 );
+            CreateMap<ProfilePhoto, PhotoDto>();
         }
     }
 }

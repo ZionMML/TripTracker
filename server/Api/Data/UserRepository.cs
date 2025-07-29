@@ -33,4 +33,9 @@ public class UserRepository(ApplicationDbContext _context) : IUserRepository
     {
         _context.Users.Remove(user);
     }
+
+    public void DeleteProfilePhoto(ProfilePhoto photo)
+    {
+        _context.Entry(photo).State = EntityState.Deleted;
+    }
 }

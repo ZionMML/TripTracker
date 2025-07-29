@@ -9,4 +9,6 @@ public interface IUserRepository
     Task<bool> SaveAllAsync();
     void Update(ApplicationUser user);
     void Delete(ApplicationUser user);
+
+    void DeleteProfilePhoto(ProfilePhoto photo);
 }
