@@ -9,13 +9,17 @@ public class UserRepository(ApplicationDbContext _context) : IUserRepository
 {
     public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
     {
-        return await _context.Users.Include(u => u.ProfilePhoto).ToListAsync();
+        return await _context
+            .Users.Include(u => u.ProfilePhoto)
+            .Include(u => u.Trips)
+            .ToListAsync();
     }
 
     public async Task<ApplicationUser?> GetUserByUsernameAsync(string username)
     {
         return await _context
             .Users.Include(u => u.ProfilePhoto)
+            .Include(u => u.Trips)
             .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
     }
 

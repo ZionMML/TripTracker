@@ -21,4 +21,6 @@ public class ApplicationUser : IdentityUser
     public DateTime RefreshTokenExpiryTime { get; set; }
 
     public ProfilePhoto? ProfilePhoto { get; set; } = null;
+
+    public ICollection<Trip> Trips { get; set; } = [];
 }

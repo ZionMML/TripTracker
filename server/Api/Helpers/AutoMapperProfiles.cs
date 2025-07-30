@@ -20,14 +20,6 @@ namespace Api.Helpers
                     dest => dest.DateOfBirth,
                     opt => opt.MapFrom(src => DateOnly.FromDateTime(src.DateOfBirth))
                 );
-            CreateMap<string, DateOnly>().ConvertUsing(s => DateOnly.Parse(s));
-            CreateMap<DateTime, DateTime>()
-                .ConstructUsing(d => DateTime.SpecifyKind(d, DateTimeKind.Utc));
-            CreateMap<DateTime?, DateTime?>()
-                .ConvertUsing(d =>
-                    d.HasValue ? DateTime.SpecifyKind(d.Value, DateTimeKind.Utc) : null
-                );
-            CreateMap<DateTime, DateOnly>().ConvertUsing(dt => DateOnly.FromDateTime(dt));
             CreateMap<ApplicationUser, UserDto>()
                 .ForMember(
                     dest => dest.ProfilePhotoUrl,
@@ -40,8 +32,25 @@ namespace Api.Helpers
                         opt.MapFrom(src =>
                             src.ProfilePhoto != null ? src.ProfilePhoto.Id : (int?)null
                         )
+                )
+                .ForMember(dest => dest.Trips, opt => opt.MapFrom(src => src.Trips));
+
+            CreateMap<string, DateOnly>().ConvertUsing(s => DateOnly.Parse(s));
+            CreateMap<DateTime, DateTime>()
+                .ConstructUsing(d => DateTime.SpecifyKind(d, DateTimeKind.Utc));
+            CreateMap<DateTime?, DateTime?>()
+                .ConvertUsing(d =>
+                    d.HasValue ? DateTime.SpecifyKind(d.Value, DateTimeKind.Utc) : null
                 );
+            CreateMap<DateTime, DateOnly>().ConvertUsing(dt => DateOnly.FromDateTime(dt));
+
             CreateMap<ProfilePhoto, PhotoDto>();
+
+            CreateMap<Trip, TripDto>();
+            CreateMap<CreateTripDto, Trip>()
+                .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
+            CreateMap<UpdateTripDto, Trip>()
+                .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
         }
     }
 }
