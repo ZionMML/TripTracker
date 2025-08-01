@@ -233,35 +233,35 @@ const UserDetail: React.FC<UserDetailProps> = ({
               </div>
 
               <Form.Item label="About" name="about">
-                <Input.TextArea rows={3} />
+                <Input.TextArea allowClear rows={3} />
               </Form.Item>
 
               <Form.Item
                 label="First Contact Person Name"
                 name="firstContactName"
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
 
               <Form.Item
                 label="First Contact Phone Number"
                 name="firstContactPhNo"
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
 
               <Form.Item
                 label="Second Contact Person Name"
                 name="secondContactName"
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
 
               <Form.Item
                 label="Second Contact Phone Number"
                 name="secondContactPhNo"
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -272,14 +272,14 @@ const UserDetail: React.FC<UserDetailProps> = ({
                 rules={[{ required: true, message: "Username is required" }]}
                 style={{ marginTop: "15px" }}
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
               <Form.Item
                 label="Known As"
                 name="knownAs"
                 rules={[{ required: true, message: "Known As is required" }]}
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
               {isNewMode && (
                 <Form.Item
@@ -287,7 +287,7 @@ const UserDetail: React.FC<UserDetailProps> = ({
                   name="password"
                   rules={[{ required: true, message: "Password is required" }]}
                 >
-                  <Input.Password />
+                  <Input.Password allowClear />
                 </Form.Item>
               )}
               <Form.Item
@@ -315,14 +315,14 @@ const UserDetail: React.FC<UserDetailProps> = ({
                 name="city"
                 rules={[{ required: true, message: "City is required" }]}
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
               <Form.Item
                 label="Country"
                 name="country"
                 rules={[{ required: true, message: "Country is required" }]}
               >
-                <Input />
+                <Input allowClear />
               </Form.Item>
               <Form.Item style={{ marginTop: "55px" }}>
                 <Button

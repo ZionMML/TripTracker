@@ -137,6 +137,19 @@ const TripsList: React.FC = () => {
         new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
     },
     {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      filters: [
+        { text: "Planned", value: "Planned" },
+        { text: "Started", value: "Started" },
+        { text: "Delayed", value: "Delayed" },
+        { text: "Canceled", value: "Canceled" },
+        { text: "Completed", value: "Completed" },
+      ],
+      onFilter: (value, record) => record.status === value,
+    },
+    {
       title: "Created Date",
       dataIndex: "createdDate",
       key: "createdDate",

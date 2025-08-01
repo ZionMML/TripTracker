@@ -1,15 +1,27 @@
-import { Button, Col, DatePicker, Form, Input, message, Row } from "antd";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Drawer,
+  Form,
+  Input,
+  message,
+  Row,
+  Select,
+} from "antd";
 import type { CreateTripDto } from "../../types/types";
 import {
   useCreateTripMutation,
   useGetTripQuery,
+  useGetTripsQuery,
   useUpdateTripMutation,
 } from "../../services/api";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
+import { GoogleOutlined } from "@ant-design/icons";
 
 type TripDetailProps = {
   isEditMode?: boolean;
@@ -21,10 +33,22 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
   const [updateTrip] = useUpdateTripMutation();
   const navigate = useNavigate();
 
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const showDrawer = () => setIsDrawerOpen(true);
+  const closeDrawer = () => setIsDrawerOpen(false);
+
+  const MapKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
   const userInfo = useSelector((state: RootState) => state.auth);
 
   const params = useParams();
   const tripId = isEditMode ? parseInt(params.id!, 10) : 0;
+
+  const username = userInfo?.user?.username;
+  const { data: trips = [] } = useGetTripsQuery(username!, {
+    skip: !username || isEditMode,
+  });
 
   const { data: trip } = useGetTripQuery(tripId, {
     skip: !isEditMode || tripId === 0,
@@ -47,6 +71,17 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
   }, [trip, form, isEditMode]);
 
   const handleSubmit = async (values: CreateTripDto) => {
+    if (!isEditMode) {
+      const hasIncompleteTrip = trips.some(
+        (trip) => trip.status === "Started" || trip.status === "Delayed"
+      );
+
+      if (hasIncompleteTrip) {
+        message.error("You have incomplete trips such as started or delayed.");
+        return;
+      }
+    }
+
     try {
       const formattedValues = {
         ...values,
@@ -87,7 +122,7 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
       <Row gutter={32}>
         <Col span={12}>
           <Form.Item label="Trip Info" name="tripInfo">
-            <Input.TextArea rows={3} />
+            <Input.TextArea allowClear rows={3} />
           </Form.Item>
 
           <Form.Item
@@ -95,7 +130,7 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
             name="start"
             rules={[{ required: true, message: "Start Place is required" }]}
           >
-            <Input />
+            <Input allowClear />
           </Form.Item>
 
           <Form.Item
@@ -115,7 +150,7 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
             name="end"
             rules={[{ required: true, message: "End Place is required" }]}
           >
-            <Input />
+            <Input allowClear />
           </Form.Item>
 
           <Form.Item
@@ -130,7 +165,53 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
             />
           </Form.Item>
 
-          <Form.Item style={{ marginTop: "55px" }}>
+          <Form.Item
+            label="Trip Status"
+            name="status"
+            rules={[{ required: true, message: "Trip Status is required" }]}
+            initialValue="Planned"
+          >
+            <Select>
+              <Select.Option value="Planned">Planned</Select.Option>
+              <Select.Option value="Started">Started</Select.Option>
+              {isEditMode && (
+                <>
+                  <Select.Option value="Delayed">Delayed</Select.Option>
+                  <Select.Option value="Canceled">Canceled</Select.Option>
+                  <Select.Option value="Completed">Completed</Select.Option>
+                </>
+              )}
+            </Select>
+          </Form.Item>
+
+          <Form.Item>
+            <Button icon={<GoogleOutlined />} type="link" onClick={showDrawer}>
+              Google Map
+            </Button>
+          </Form.Item>
+
+          <Drawer
+            title="Google Map"
+            placement="right"
+            onClose={closeDrawer}
+            open={isDrawerOpen}
+            width={600}
+          >
+            <iframe
+              title="Google Map"
+              width="100%"
+              height="400"
+              frameBorder="0"
+              style={{ border: 0 }}
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.google.com/maps/embed/v1/place?key=${MapKey}&q=${form.getFieldValue(
+                "end"
+              )}`}
+              allowFullScreen
+            />
+          </Drawer>
+
+          <Form.Item style={{ marginTop: "25px" }}>
             <Button
               htmlType="button"
               disabled={formDisabled}

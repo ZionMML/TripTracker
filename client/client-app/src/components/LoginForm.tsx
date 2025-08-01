@@ -84,14 +84,14 @@ const LoginForm: React.FC = () => {
           name="username"
           rules={[{ required: true, message: "Please enter your username" }]}
         >
-          <Input />
+          <Input allowClear />
         </Form.Item>
         <Form.Item
           label="Password"
           name="password"
           rules={[{ required: true, message: "Please enter your password" }]}
         >
-          <Input.Password />
+          <Input.Password allowClear />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={isLoading} block>

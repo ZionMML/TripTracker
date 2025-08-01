@@ -118,11 +118,15 @@ const MainLayout: React.FC = () => {
                   },
                 ]
               : []),
-            {
-              key: "4",
-              icon: <StockOutlined />,
-              label: "Trip",
-            },
+            ...(userRole?.trim().toLowerCase() === "user"
+              ? [
+                  {
+                    key: "4",
+                    icon: <StockOutlined />,
+                    label: "Trip",
+                  },
+                ]
+              : []),
             {
               key: "5",
               icon: <FundOutlined />,
