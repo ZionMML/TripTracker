@@ -4,8 +4,10 @@ import LoginForm from "./components/LoginForm";
 import PrivateRoute from "./auth/PrivateRoute";
 import Home from "./pages/Home";
 import UserDetail from "./pages/User/UserDetail";
+import TripDetail from "./pages/Trip/TripDetail";
 import MainLayout from "./layouts/MainLayout";
 import UsersList from "./pages/User/UsersList";
+import TripsList from "./pages/Trip/TripsList";
 
 const App = () => {
   return (
@@ -50,6 +52,38 @@ const App = () => {
           element={
             <PrivateRoute>
               <UsersList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/trip/create"
+          element={
+            <PrivateRoute>
+              <TripDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/trip/tripdetail"
+          element={
+            <PrivateRoute>
+              <TripDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/trips/edit/:id"
+          element={
+            <PrivateRoute>
+              <TripDetail isEditMode={true} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/trip/tripslist"
+          element={
+            <PrivateRoute>
+              <TripsList />
             </PrivateRoute>
           }
         />

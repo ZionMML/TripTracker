@@ -40,6 +40,12 @@ const MainLayout: React.FC = () => {
       return "/user/userslist";
     if (location.pathname.startsWith("/users/edit")) return "/user/userdetail";
     if (location.pathname.startsWith("/user/create")) return "/user/userdetail";
+    if (location.pathname.startsWith("/trip/create")) return "/trip/tripdetail";
+    if (location.pathname.startsWith("/trip/tripdetail"))
+      return "/trip/tripdetail";
+    if (location.pathname.startsWith("/trips/edit")) return "/trip/tripdetail";
+    if (location.pathname.startsWith("/trip/tripslist"))
+      return "/trip/tripslist";
     return location.pathname;
   })();
 
@@ -47,10 +53,11 @@ const MainLayout: React.FC = () => {
     "/home": "1",
     "/user/userdetail": "2",
     "/user/userslist": "3",
-    "/trip": "4",
-    "/triphistory": "5",
+    "/trip/tripdetail": "4",
+    "/trip/tripslist": "5",
     "/users/edit": "6",
     "/user/create": "7",
+    "/trips/edit": "8",
   };
 
   const selectedKey = pathToKey[normalizePath] || "";
@@ -87,8 +94,8 @@ const MainLayout: React.FC = () => {
             if (key === "1") navigate("/home");
             if (key === "2") navigate("/user/userdetail");
             if (key === "3") navigate("/user/userslist");
-            if (key === "4") navigate("/trip");
-            if (key === "5") navigate("/triphistory");
+            if (key === "4") navigate("/trip/tripdetail");
+            if (key === "5") navigate("/trip/tripslist");
             if (key === "6") handleLogout();
           }}
           items={[
@@ -155,6 +162,17 @@ const MainLayout: React.FC = () => {
               Create New User
             </Button>
           )}
+
+          {location.pathname === "/trip/tripslist" &&
+            userRole?.trim().toLowerCase() === "user" && (
+              <Button
+                type="primary"
+                onClick={() => navigate("/trip/create")}
+                style={{ marginRight: 16 }}
+              >
+                Create New Trip
+              </Button>
+            )}
         </Header>
         <Content
           style={{

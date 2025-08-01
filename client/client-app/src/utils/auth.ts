@@ -1,8 +1,15 @@
 import { jwtDecode } from "jwt-decode";
 
+export type JwtPayloadRaw = {
+  role: string;
+  exp: number;
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string;
+};
+
 export type JwtPayload = {
   role: string;
   exp: number;
+  userId: string;
 };
 
 export function getUserInfoFromToken(token: string): JwtPayload | null {
@@ -15,9 +22,16 @@ export function getUserInfoFromToken(token: string): JwtPayload | null {
   }
 
   try {
-    const decoded = jwtDecode<JwtPayload>(token);
+    const decoded = jwtDecode<JwtPayloadRaw>(token);
 
-    return decoded;
+    return {
+      role: decoded.role,
+      exp: decoded.exp,
+      userId:
+        decoded[
+          "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+        ],
+    };
   } catch (err) {
     console.error("Invalid token", err);
     return null;

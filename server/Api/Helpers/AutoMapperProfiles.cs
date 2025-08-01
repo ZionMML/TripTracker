@@ -46,7 +46,11 @@ namespace Api.Helpers
 
             CreateMap<ProfilePhoto, PhotoDto>();
 
-            CreateMap<Trip, TripDto>();
+            CreateMap<Trip, TripDto>()
+                .ForMember(
+                    dest => dest.KnownAs,
+                    opt => opt.MapFrom(src => src.User != null ? src.User.KnownAs : null)
+                );
             CreateMap<CreateTripDto, Trip>()
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
             CreateMap<UpdateTripDto, Trip>()

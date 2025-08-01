@@ -3,6 +3,7 @@ namespace API.DTOs;
 public class TripDto
 {
     public int Id { get; set; }
+    public string? KnownAs { get; set; }
 
     public required string Start { get; set; }
 

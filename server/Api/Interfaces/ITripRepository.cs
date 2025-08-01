@@ -4,7 +4,7 @@ namespace Api.Interfaces;
 
 public interface ITripRepository
 {
-    Task<IEnumerable<Trip>> GetTripsByUserIdAsync(string userId);
+    Task<IEnumerable<Trip>> GetTripsByUsernameAsync(string username);
     Task<Trip?> GetTripByIdAsync(int id);
     Task AddTripAsync(Trip trip);
     void UpdateTrip(Trip trip);

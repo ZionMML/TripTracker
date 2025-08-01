@@ -2,28 +2,30 @@ using API.DTOs;
 using Api.Interfaces;
 using Api.Models;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TripsController(ITripRepository tripRepository, IMapper _mapper) : ControllerBase
     {
         private readonly ITripRepository _tripRepository = tripRepository;
 
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<TripDto>>> GetTrips(string userId)
+        [Authorize(Roles = "Admin,User")]
+        [HttpGet("user/{username}")]
+        public async Task<ActionResult<IEnumerable<TripDto>>> GetTrips(string username)
         {
-            var trips = await _tripRepository.GetTripsByUserIdAsync(userId);
+            var trips = await _tripRepository.GetTripsByUsernameAsync(username);
 
-            if (trips == null || !trips.Any())
-                return BadRequest("No trips found for this user");
-
-            var tripDtos = _mapper.Map<IEnumerable<TripDto>>(trips);
+            var tripDtos = _mapper.Map<IEnumerable<TripDto>>(trips ?? []);
             return Ok(tripDtos);
         }
 
+        [Authorize(Roles = "Admin,User")]
         [HttpGet("{id}")]
         public async Task<ActionResult<TripDto>> GetTrip(int id)
         {
@@ -35,6 +37,7 @@ namespace Api.Controllers
             return Ok(_mapper.Map<TripDto>(trip));
         }
 
+        [Authorize(Roles = "User")]
         [HttpPost]
         public async Task<ActionResult<TripDto>> CreateTrip([FromBody] CreateTripDto createTripDto)
         {
@@ -50,6 +53,7 @@ namespace Api.Controllers
             return CreatedAtAction(nameof(GetTrip), new { id = trip.Id }, tripDto);
         }
 
+        [Authorize(Roles = "User")]
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateTrip(int id, [FromBody] UpdateTripDto updateTripDto)
         {
@@ -67,6 +71,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "User")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTrip(int id)
         {

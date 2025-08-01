@@ -35,3 +35,35 @@ export interface CreateUserDto {
   secondContactPhNo: string;
   about: string;
 }
+
+export interface Trip {
+  id: number;
+  knownAs: string;
+  start: string;
+  startDate: string;
+  end: string;
+  endDate: string;
+  tripInfo: string;
+  createdDate: string;
+  updatedDate: string;
+  key: React.Key;
+}
+
+export interface CreateTripDto {
+  username: string;
+  userId: string;
+  start: string;
+  startDate: string;
+  end: string;
+  endDate: string;
+  tripInfo: string;
+}
+
+export interface UpdateTripDto {
+  username: string;
+  start: string;
+  startDate: string;
+  end: string;
+  endDate: string;
+  tripInfo: string;
+}

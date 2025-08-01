@@ -1,6 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearToken, getRefreshToken, getToken, setToken } from "./authService";
-import type { CreateUserDto, ProfilePhoto, User } from "../types/types";
+import type {
+  CreateUserDto,
+  ProfilePhoto,
+  Trip,
+  UpdateTripDto,
+  User,
+} from "../types/types";
 import type {
   BaseQueryFn,
   FetchArgs,
@@ -112,7 +118,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Users"],
+  tagTypes: ["Users", "Trips"],
   endpoints: (builder) => ({
     getItems: builder.query<{ id: number; name: string }[], void>({
       query: () => "items",
@@ -204,6 +210,69 @@ export const api = createApi({
       }),
       invalidatesTags: ["Users"],
     }),
+    getTrips: builder.query<Trip[], string>({
+      query: (username) => `trips/user/${username}`,
+      providesTags: (result, _error, username) =>
+        result
+          ? [
+              ...result.map((trip) => ({
+                type: "Trips" as const,
+                id: trip.id,
+              })),
+              { type: "Trips", id: username },
+            ]
+          : [{ type: "Trips", id: username }],
+    }),
+    getTrip: builder.query<Trip, number>({
+      query: (id) => `trips/${id}`,
+      providesTags: (_result, _error, id) => [{ type: "Trips", id: id }],
+    }),
+    createTrip: builder.mutation<
+      void,
+      {
+        username: string;
+        userId: string;
+        start: string;
+        startDate: string;
+        end: string;
+        endDate: string;
+        tripInfo: string;
+      }
+    >({
+      query: (tripData) => {
+        const { username, ...trip } = tripData;
+
+        // Reference username to suppress warning
+        void username;
+
+        return { url: "trips", method: "POST", body: trip };
+      },
+      invalidatesTags: (_result, _error, { username }) => [
+        { type: "Trips", id: username },
+      ],
+    }),
+    updateTrip: builder.mutation<void, { id: number; body: UpdateTripDto }>({
+      query: ({ id, body }) => ({
+        url: `trips/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        {
+          type: "Trips",
+          id: id,
+        },
+      ],
+    }),
+    deleteTrip: builder.mutation<void, { id: number; username: string }>({
+      query: ({ id }) => ({
+        url: `trips/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, { username }) => [
+        { type: "Trips", id: username },
+      ],
+    }),
   }),
 });
 
@@ -217,4 +286,9 @@ export const {
   useDeleteUserMutation,
   useAddPhotoMutation,
   useDeletePhotoMutation,
+  useGetTripsQuery,
+  useGetTripQuery,
+  useCreateTripMutation,
+  useUpdateTripMutation,
+  useDeleteTripMutation,
 } = api;
