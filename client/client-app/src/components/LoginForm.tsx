@@ -32,6 +32,7 @@ const LoginForm: React.FC = () => {
         dispatch(
           setUser({
             username: values.username,
+            userId: tokenInfo.userId,
             knownAs: "",
             role: tokenInfo.role,
             exp: tokenInfo.exp,

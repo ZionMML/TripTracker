@@ -136,6 +136,7 @@ builder.Services.Configure<CloudinarySettings>(
 
 builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ITripRepository, TripRepository>();
 
 var app = builder.Build();
 

@@ -1,3 +1,5 @@
+using API.DTOs;
+
 namespace Api.DTOs;
 
 public class UserDto
@@ -17,4 +19,6 @@ public class UserDto
 
     public string? ProfilePhotoUrl { get; set; }
     public int? ProfilePhotoId { get; set; }
+
+    public List<TripDto>? Trips { get; set; }
 }

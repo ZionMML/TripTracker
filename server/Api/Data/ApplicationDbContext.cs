@@ -12,6 +12,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
     public DbSet<ProfilePhoto> ProfilePhotos { get; set; } = null!;
 
+    public DbSet<Trip> Trips { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -21,6 +23,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(u => u.ProfilePhoto)
             .WithOne(p => p.User)
             .HasForeignKey<ProfilePhoto>(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Entity<Trip>()
+            .HasOne(t => t.User)
+            .WithMany(u => u.Trips)
+            .HasForeignKey(t => t.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

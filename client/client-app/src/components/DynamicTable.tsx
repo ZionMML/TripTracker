@@ -22,6 +22,7 @@ interface DynamicTableProps<T extends { key: React.Key }> {
   onEdit?: (record: T) => void;
   onDelete?: (record: T) => void;
   showActions?: boolean;
+  hideDeleteButton?: boolean;
 }
 
 const DynamicTable = <T extends { key: React.Key }>({
@@ -30,6 +31,7 @@ const DynamicTable = <T extends { key: React.Key }>({
   onEdit,
   onDelete,
   showActions = true,
+  hideDeleteButton = false,
 }: DynamicTableProps<T>) => {
   const { styles } = useStyle();
 
@@ -43,10 +45,10 @@ const DynamicTable = <T extends { key: React.Key }>({
         <>
           {onEdit && (
             <Button type="link" onClick={() => onEdit(record)}>
-              Edit
+              {!hideDeleteButton ? "Edit" : "Details"}
             </Button>
           )}
-          {onDelete && (
+          {onDelete && !hideDeleteButton && (
             <Popconfirm
               title="Are you sure to delete?"
               onConfirm={() => onDelete(record)}

@@ -114,7 +114,7 @@ namespace Api.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            await _userManager.AddToRoleAsync(user, "Admin");
+            await _userManager.AddToRoleAsync(user, "User");
 
             var userDto = _mapper.Map<UserDto>(user);
 
