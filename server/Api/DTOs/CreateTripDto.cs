@@ -16,6 +16,8 @@ public class CreateTripDto
 
     public string? TripInfo { get; set; }
 
+    public required string Status { get; set; }
+
     public DateTime CreatedDate { get; set; }
 
     public string? UserId { get; set; }

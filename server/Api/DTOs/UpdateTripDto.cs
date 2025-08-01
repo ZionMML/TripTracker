@@ -12,5 +12,7 @@ public class UpdateTripDto
 
     public string? TripInfo { get; set; }
 
+    public required string Status { get; set; }
+
     public DateTime UpdatedDate { get; set; }
 }

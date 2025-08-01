@@ -237,6 +237,7 @@ export const api = createApi({
         end: string;
         endDate: string;
         tripInfo: string;
+        status: string;
       }
     >({
       query: (tripData) => {

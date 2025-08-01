@@ -44,6 +44,7 @@ export interface Trip {
   end: string;
   endDate: string;
   tripInfo: string;
+  status: string;
   createdDate: string;
   updatedDate: string;
   key: React.Key;
@@ -57,6 +58,7 @@ export interface CreateTripDto {
   end: string;
   endDate: string;
   tripInfo: string;
+  status: string;
 }
 
 export interface UpdateTripDto {
@@ -66,4 +68,5 @@ export interface UpdateTripDto {
   end: string;
   endDate: string;
   tripInfo: string;
+  status: string;
 }
