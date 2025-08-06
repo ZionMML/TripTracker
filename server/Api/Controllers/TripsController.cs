@@ -1,5 +1,6 @@
 using API.DTOs;
 using Api.Interfaces;
+using API.Interfaces;
 using Api.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,11 @@ namespace Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class TripsController(ITripRepository tripRepository, IMapper _mapper) : ControllerBase
+    public class TripsController(
+        ITripRepository tripRepository,
+        IMapper _mapper,
+        IPhotoService photoService
+    ) : ControllerBase
     {
         private readonly ITripRepository _tripRepository = tripRepository;
 
@@ -86,6 +91,76 @@ namespace Api.Controllers
                 return BadRequest("Failed to delete trip");
 
             return NoContent();
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpPost("add-photo")]
+        public async Task<ActionResult<PhotoDto>> AddPhoto(
+            [FromForm] int tripId,
+            [FromForm] IFormFile file
+        )
+        {
+            var trip = await _tripRepository.GetTripByIdAsync(tripId);
+
+            if (trip == null)
+                return BadRequest("Cannot upload photo");
+
+            if (file == null || file.Length == 0)
+                return BadRequest("No file updloaded.");
+
+            var result = await photoService.AddPhotoAsync(file);
+
+            if (result.Error != null)
+                return BadRequest(result.Error.Message);
+
+            var photo = new TripPhoto
+            {
+                Url = result.SecureUrl.AbsoluteUri,
+                PublicId = result.PublicId,
+            };
+
+            if (trip.TripPhotos == null)
+                trip.TripPhotos = new List<TripPhoto>();
+
+            trip.TripPhotos.Add(photo);
+            await _tripRepository.SaveAllAsync();
+
+            return CreatedAtAction(
+                nameof(GetTrip),
+                new { id = trip.Id },
+                _mapper.Map<PhotoDto>(photo)
+            );
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpDelete("delete-photo")]
+        public async Task<ActionResult<TripPhoto>> DeletePhoto(
+            [FromQuery] int tripId,
+            [FromQuery] int photoId
+        )
+        {
+            var trip = await _tripRepository.GetTripByIdAsync(tripId);
+
+            if (trip == null)
+                return BadRequest("Trip not found");
+
+            var photo = trip.TripPhotos.FirstOrDefault(p => p.Id == photoId);
+
+            if (photo == null || photo.Id != photoId)
+                return BadRequest("This photo cannot be deleted");
+
+            if (photo.PublicId != null)
+            {
+                var result = await photoService.DeletePhotoAsync(photo.PublicId);
+                if (result.Error != null)
+                    return BadRequest(result.Error.Message);
+            }
+
+            _tripRepository.DeleteTripPhoto(photo);
+            trip.TripPhotos.Remove(photo);
+            await _tripRepository.SaveAllAsync();
+
+            return Ok();
         }
     }
 }

@@ -1,5 +1,6 @@
 using Api.Models;
 using AutoMapper;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         : base(options) { }
 
     public DbSet<ProfilePhoto> ProfilePhotos { get; set; } = null!;
+
+    public DbSet<TripPhoto> TripPhotos { get; set; } = null!;
 
     public DbSet<Trip> Trips { get; set; } = null!;
 
@@ -30,6 +33,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(t => t.User)
             .WithMany(u => u.Trips)
             .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Entity<Trip>()
+            .HasMany(t => t.TripPhotos)
+            .WithOne(p => p.Trip)
+            .HasForeignKey(p => p.TripId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

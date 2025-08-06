@@ -9,7 +9,7 @@ import {
   Row,
   Select,
 } from "antd";
-import type { CreateTripDto } from "../../types/types";
+import type { TripPhoto, CreateTripDto } from "../../types/types";
 import {
   useCreateTripMutation,
   useGetTripQuery,
@@ -18,10 +18,11 @@ import {
 } from "../../services/api";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { useNavigate, useParams } from "react-router-dom";
 import { GoogleOutlined } from "@ant-design/icons";
+import TripPhotoGallery from "./TripPhotoGallery";
 
 type TripDetailProps = {
   isEditMode?: boolean;
@@ -34,6 +35,7 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
   const navigate = useNavigate();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [localPhotos, setLocalPhotos] = useState<TripPhoto[]>([]);
 
   const showDrawer = () => setIsDrawerOpen(true);
   const closeDrawer = () => setIsDrawerOpen(false);
@@ -49,6 +51,8 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
   const { data: trips = [] } = useGetTripsQuery(username!, {
     skip: !username || isEditMode,
   });
+
+  const tripIdRef = useRef<number | null>(isEditMode ? tripId : null);
 
   const { data: trip } = useGetTripQuery(tripId, {
     skip: !isEditMode || tripId === 0,
@@ -67,19 +71,33 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
           ? (dayjs(trip.endDate) as unknown as string)
           : undefined,
       });
+      if (trip.tripPhotos) setLocalPhotos(trip.tripPhotos);
     }
   }, [trip, form, isEditMode]);
 
+  const checkValidTrip = () => {
+    const hasIncompleteTrip = trips.some(
+      (trip) => trip.status === "Started" || trip.status === "Delayed"
+    );
+
+    if (hasIncompleteTrip) {
+      message.error("You have incomplete trips such as started or delayed.");
+      return false;
+    }
+    return true;
+  };
+
+  const handlePhotoUploadSuccess = (newPhoto: TripPhoto) => {
+    setLocalPhotos((prevPhotos) => [...prevPhotos, newPhoto]);
+  };
+
+  const handlePhotoDeleteSuccess = (photoId: number) => {
+    setLocalPhotos((prevPhotos) => prevPhotos.filter((p) => p.id !== photoId));
+  };
+
   const handleSubmit = async (values: CreateTripDto) => {
     if (!isEditMode) {
-      const hasIncompleteTrip = trips.some(
-        (trip) => trip.status === "Started" || trip.status === "Delayed"
-      );
-
-      if (hasIncompleteTrip) {
-        message.error("You have incomplete trips such as started or delayed.");
-        return;
-      }
+      if (!checkValidTrip()) return;
     }
 
     try {
@@ -98,7 +116,8 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
         }).unwrap();
         message.success("Trip updated successfully");
       } else {
-        await createTrip(formattedValues).unwrap();
+        const createdTrip = await createTrip(formattedValues).unwrap();
+        tripIdRef.current = createdTrip.id;
         message.success("Trip created successfully");
       }
       setTimeout(() => {
@@ -108,6 +127,33 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
     } catch (error: unknown) {
       message.error("Failed to create trip");
       console.error(error);
+    }
+  };
+
+  const ensureTripCreatedBeforePhotoUpload = async (): Promise<
+    number | null
+  > => {
+    try {
+      const values = await form.validateFields();
+
+      if (!checkValidTrip()) return null;
+
+      if (!tripIdRef.current) {
+        const createdTrip = await createTrip({
+          ...values,
+          username: userInfo.user?.username ?? "",
+          userId: userInfo.user?.userId ?? "",
+          startDate: dayjs(values.startDate).toISOString(),
+          endDate: dayjs(values.endDate).toISOString(),
+        }).unwrap();
+
+        tripIdRef.current = createdTrip.id;
+      }
+
+      return tripIdRef.current;
+    } catch {
+      message.error("Please complete the form before uploading a photo.");
+      return null;
     }
   };
 
@@ -189,6 +235,14 @@ const TripDetail: React.FC<TripDetailProps> = ({ isEditMode = false }) => {
               Google Map
             </Button>
           </Form.Item>
+
+          <TripPhotoGallery
+            tripId={trip?.id ?? 0}
+            tripPhotos={isEditMode ? trip?.tripPhotos ?? [] : localPhotos}
+            onEnsureTripCreated={ensureTripCreatedBeforePhotoUpload}
+            onPhotoUploadSuccess={handlePhotoUploadSuccess}
+            onPhotoDeleteSuccess={handlePhotoDeleteSuccess}
+          />
 
           <Drawer
             title="Google Map"

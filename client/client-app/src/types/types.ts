@@ -21,6 +21,11 @@ export interface ProfilePhoto {
   url: string;
 }
 
+export interface TripPhoto {
+  id: number;
+  url: string;
+}
+
 export interface CreateUserDto {
   username: string;
   password: string;
@@ -48,6 +53,7 @@ export interface Trip {
   createdDate: string;
   updatedDate: string;
   key: React.Key;
+  tripPhotos?: TripPhoto[];
 }
 
 export interface CreateTripDto {

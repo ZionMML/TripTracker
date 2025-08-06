@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearToken, getRefreshToken, getToken, setToken } from "./authService";
 import type {
+  TripPhoto,
   CreateUserDto,
   ProfilePhoto,
   Trip,
@@ -118,7 +119,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["Users", "Trips"],
+  tagTypes: ["Users", "Trips", "Trip"],
   endpoints: (builder) => ({
     getItems: builder.query<{ id: number; name: string }[], void>({
       query: () => "items",
@@ -225,10 +226,10 @@ export const api = createApi({
     }),
     getTrip: builder.query<Trip, number>({
       query: (id) => `trips/${id}`,
-      providesTags: (_result, _error, id) => [{ type: "Trips", id: id }],
+      providesTags: (_result, _error, id) => [{ type: "Trip", id: id }],
     }),
     createTrip: builder.mutation<
-      void,
+      Trip,
       {
         username: string;
         userId: string;
@@ -274,6 +275,40 @@ export const api = createApi({
         { type: "Trips", id: username },
       ],
     }),
+    addTripPhoto: builder.mutation<TripPhoto, { tripId: number; file: File }>({
+      query: ({ tripId, file }) => {
+        const formData = new FormData();
+        formData.append("tripId", tripId.toString());
+        formData.append("file", file);
+
+        return {
+          url: "trips/add-photo",
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: (_result, _error, { tripId }) => [
+        {
+          type: "Trip",
+          id: tripId,
+        },
+      ],
+    }),
+    deleteTripPhoto: builder.mutation<
+      void,
+      { tripId: number; photoId: number }
+    >({
+      query: ({ tripId, photoId }) => ({
+        url: `trips/delete-photo?tripId=${tripId}&photoId=${photoId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, { tripId }) => [
+        {
+          type: "Trip",
+          id: tripId,
+        },
+      ],
+    }),
   }),
 });
 
@@ -292,4 +327,6 @@ export const {
   useCreateTripMutation,
   useUpdateTripMutation,
   useDeleteTripMutation,
+  useAddTripPhotoMutation,
+  useDeleteTripPhotoMutation,
 } = api;

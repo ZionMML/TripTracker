@@ -1,3 +1,5 @@
+using Api.Models;
+
 namespace API.DTOs;
 
 public class TripDto
@@ -20,4 +22,6 @@ public class TripDto
     public DateTime CreatedDate { get; set; }
 
     public DateTime UpdatedDate { get; set; }
+
+    public List<PhotoDto>? TripPhotos { get; set; }
 }

@@ -23,4 +23,6 @@ public class Trip
     public string? UserId { get; set; }
 
     public ApplicationUser? User { get; set; } = null;
+
+    public List<TripPhoto> TripPhotos { get; set; } = [];
 }
