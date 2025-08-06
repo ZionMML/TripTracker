@@ -42,7 +42,10 @@ public class TripRepository(
 
     public async Task<Trip?> GetTripByIdAsync(int id)
     {
-        return await _context.Trips.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
+        return await _context
+            .Trips.Include(p => p.TripPhotos)
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Id == id);
     }
 
     public async Task AddTripAsync(Trip trip)
@@ -63,5 +66,10 @@ public class TripRepository(
     public async Task<bool> SaveAllAsync()
     {
         return await _context.SaveChangesAsync() > 0;
+    }
+
+    public void DeleteTripPhoto(TripPhoto tripPhoto)
+    {
+        _context.Entry(tripPhoto).State = EntityState.Deleted;
     }
 }

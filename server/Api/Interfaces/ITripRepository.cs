@@ -10,4 +10,6 @@ public interface ITripRepository
     void UpdateTrip(Trip trip);
     void DeleteTrip(Trip trip);
     Task<bool> SaveAllAsync();
+
+    void DeleteTripPhoto(TripPhoto tripPhoto);
 }

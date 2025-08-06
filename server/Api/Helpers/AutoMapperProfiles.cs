@@ -45,6 +45,7 @@ namespace Api.Helpers
             CreateMap<DateTime, DateOnly>().ConvertUsing(dt => DateOnly.FromDateTime(dt));
 
             CreateMap<ProfilePhoto, PhotoDto>();
+            CreateMap<TripPhoto, PhotoDto>();
 
             CreateMap<Trip, TripDto>()
                 .ForMember(
