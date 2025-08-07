@@ -26,20 +26,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(u => u.ProfilePhoto)
             .WithOne(p => p.User)
             .HasForeignKey<ProfilePhoto>(p => p.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .Entity<Trip>()
             .HasOne(t => t.User)
             .WithMany(u => u.Trips)
             .HasForeignKey(t => t.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .Entity<Trip>()
             .HasMany(t => t.TripPhotos)
             .WithOne(p => p.Trip)
             .HasForeignKey(p => p.TripId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
